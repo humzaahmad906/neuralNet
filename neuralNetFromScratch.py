@@ -23,24 +23,39 @@ for j in range(len(initialWeights[0])):
     print(initialWeights[0][j].shape)
 #as now we have initialized our network lets see if it will be able to predict anything
 def feedForward(input, weights, biases):
+    layerOutputsBefore = []
+    layerOutputsAfter = []
     dummyInput = None
     for k in range(len(weights)):
         if k == 0:
             dummyInput = np.dot(input, weights[k])+biases[k]
+            layerOutputsBefore.append(dummyInput)
             #relu implementation
             dummyInput = np.maximum(0, dummyInput)
+            layerOutputsAfter.append(dummyInput)
         elif k != (len(weights)-1):
             dummyInput = np.dot(dummyInput, weights[k])+biases[k]
+            layerOutputsBefore.append(dummyInput)
             dummyInput = np.maximum(0, dummyInput)
+            layerOutputsAfter.append(dummyInput)
         else:
             dummyInput = np.dot(dummyInput, weights[k])+biases[k]
+            layerOutputsBefore.append(dummyInput)
             #sigmoid implementation
             dummyInput = 1/(1+np.exp(-dummyInput))
-    return dummyInput
+            layerOutputsAfter.append(dummyInput)
+    return [dummyInput, layerOutputsBefore, layerOutputsAfter]
 #some dummy network to check if feedforward network is working
-result = feedForward(np.ones((1,24), np.float64), initialWeights[0], initialWeights[1])
+[result, layersResultBefore, layersResultAfter] = feedForward(np.ones((1,24), np.float64), initialWeights[0], initialWeights[1])
+lr = 0.01
+#backpropogation
+#define energy function
+#energy function derivative
+#-1(label/output)+(1-label)/(1-output)
+#sigmoid derivative
+#(1/(1+np.exp(-dummyInput)))*(1-(1/(1+np.exp(-dummyInput))))
 print(result)
-            
+
 
         
 
