@@ -44,17 +44,30 @@ def feedForward(input, weights, biases):
             #sigmoid implementation
             dummyInput = 1/(1+np.exp(-dummyInput))
             layerOutputsAfter.append(dummyInput)
-    return [dummyInput, layerOutputsBefore, layerOutputsAfter]
+    return [layerOutputsBefore, layerOutputsAfter]
 #some dummy network to check if feedforward network is working
-[result, layersResultBefore, layersResultAfter] = feedForward(np.ones((1,24), np.float64), initialWeights[0], initialWeights[1])
+[layersResultBefore, layersResultAfter] = feedForward(np.ones((1,24), np.float64), initialWeights[0], initialWeights[1])
 lr = 0.01
 #backpropogation
 #define energy function
 #energy function derivative
-#-1(label/output)+(1-label)/(1-output)
+gT = 1
+Oout = layersResultAfter.pop()
+dEbydOout = -1*(gT/Oout)+(1-gT)/(1-Oout)
 #sigmoid derivative
 #(1/(1+np.exp(-dummyInput)))*(1-(1/(1+np.exp(-dummyInput))))
-print(result)
+Oin = layersResultBefore.pop()
+dOoutbydOin = (1/(1+np.exp(-Oin)))*(1-(1/(1+np.exp(-Oin))))
+
+prevOut = layersResultAfter.pop()
+
+#number of columns represent the number of outputs
+#number of rows represent input
+dWbydA = np.zeros((prevOut.shape[1], Oout.shape[1]))
+print(prevOut.shape, dWbydA.shape)
+for i in range(Oout.shape[1]):
+    dWbydA[:, i] = prevOut
+print(initialWeights[0].pop())
 
 
         
