@@ -47,7 +47,7 @@ def feedForward(input, weights, biases):
     return [layerOutputsBefore, layerOutputsAfter]
 #some dummy network to check if feedforward network is working
 [layersResultBefore, layersResultAfter] = feedForward(np.ones((1,24), np.float64), initialWeights[0], initialWeights[1])
-lr = 0.01
+lr = 0.1
 #backpropogation
 #define energy function
 #energy function derivative
@@ -67,7 +67,16 @@ dWbydA = np.zeros((prevOut.shape[1], Oout.shape[1]))
 print(prevOut.shape, dWbydA.shape)
 for i in range(Oout.shape[1]):
     dWbydA[:, i] = prevOut
-print(initialWeights[0].pop())
+dEdW = dWbydA*dOoutbydOin*dEbydOout
+# print(dEdW.shape, initialWeights[0][-1].shape)
+print(initialWeights[0][-1])
+#weights update
+initialWeights[0][-1] = initialWeights[0][-1] - lr*dEdW
+print(initialWeights[0][-1])
+
+#concatenate all based on based on the formula
+# for j in range(dWbydA.shape[0]):
+    # a = np.concatenate(a,)
 
 
         
