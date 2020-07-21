@@ -67,16 +67,39 @@ dWbydA = np.zeros((prevOut.shape[1], Oout.shape[1]))
 print(prevOut.shape, dWbydA.shape)
 for i in range(Oout.shape[1]):
     dWbydA[:, i] = prevOut
+# layersResultAfter.append(prevOust)
 dEdW = dWbydA*dOoutbydOin*dEbydOout
+dEdB = dOoutbydOin*dEbydOout
 # print(dEdW.shape, initialWeights[0][-1].shape)
-print(initialWeights[0][-1])
+print(initialWeights[1][-1])
 #weights update
-initialWeights[0][-1] = initialWeights[0][-1] - lr*dEdW
-print(initialWeights[0][-1])
+weight = initialWeights[0][-1]
+bias = initialWeights[1][-1]
+weight = weight - lr*dEdW
+bias = bias - lr*dEdB
+updatedWeights = []
+updatedWeights.append([weight, bias])
+print(initialWeights[1][-1])
+Hin = layersResultBefore.pop()
+print(Hin.shape)
+dHoutdHin = np.where(Hin>0, Hin, 0)
+dHindW = layersResultAfter.pop()
+#dEtotaldA = dEdOout*dOoutdOin*dOindA
+dEtotaldA = dEbydOout*dOoutbydOin*initialWeights[0][-1]
+print(dEtotaldA.shape, dHoutdHin.shape, dHindW.shape)
+dEdW1 = np.linalg.multi_dot([np.transpose(dHindW),dHoutdHin,dEtotaldA])
+dEdB1 = np.dot(dHoutdHin, dEtotaldA)
 
-#concatenate all based on based on the formula
-# for j in range(dWbydA.shape[0]):
-    # a = np.concatenate(a,)
+weight = initialWeights[0][-2]
+bias = initialWeights[1][-2]
+weight = weight - lr*dEdW1
+bias = bias - lr*dEdB1
+updatedWeights.append([weight, bias])
+print(bias.shape, weight.shape)
+
+
+
+
 
 
         
