@@ -96,6 +96,17 @@ weight = weight - lr*dEdW1
 bias = bias - lr*dEdB1
 updatedWeights.append([weight, bias])
 print(bias.shape, weight.shape)
+#now think about how to generalize it
+#1st term dEdOout*dOoutdOin*dOindW
+#2nd term dEdOout*dooutdOin*dOindHout*dHoutdHin*dHindW
+#3rd term will be dEdOout*dooutdOin*dOindHout*dHoutdHin*dHindHout2*dHoutdHin2*dHindW3
+for each layer:
+    if layer is output:
+        gradientTerm = dEdOout*dOoutdOin*dOindW
+    if layer is hidden or input:
+        #we will save the two terms which are dOindA and dOindW to calculate the below term
+        gradientTerm = gradientTerm*dOindA*dHoutdHin*dHindW/dOindW
+
 
 
 
