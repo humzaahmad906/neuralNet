@@ -52,26 +52,46 @@ lr = 0.1
 #define energy function
 #energy function derivative
 gT = 1
-Oout = layersResultAfter.pop()
-dEbydOout = -1*(gT/Oout)+(1-gT)/(1-Oout)
+#grads define
+Lout = []
+Lin = []
+for i in range(len(layersResultAfter)):
+    Lout.append(layersResultAfter.pop())
+Lout.append(inputFeatures)
+for i in range(len(layersResultBefore)):
+    Lin.append(layersResultBefore.pop())
+def dEbydOout():
+    return -1*(gT/Lout[0])+(1-gT)/(1-Lout[0])
 #sigmoid derivative
 #(1/(1+np.exp(-dummyInput)))*(1-(1/(1+np.exp(-dummyInput))))
 Oin = layersResultBefore.pop()
-dOoutbydOin = (1/(1+np.exp(-Oin)))*(1-(1/(1+np.exp(-Oin))))
+def sigmoidDer(LayerNo):
+    return (1/(1+np.exp(-Lin[LayerNo])))*(1-(1/(1+np.exp(-Lin[LayerNo]))))
+def reluDer(LayerNo):
+    layerIn = Lin[LayerNo]
+    return np.where(layerIn>0, layerIn, 0)
 
 prevOut = layersResultAfter.pop()
+def dLindW(LayerNo):
+    dLindWvar = np.zeros((Lout[LayerNo+1].shape[1], Lout[LayerNo].shape[1]))
+    for i in range(Lout[LayerNo].shape[1]):
+        dLindWvar[:, i] = Lout[LayerNo+1]
+    return dLindWvar
+def dLindA(LayerNo):
+    return Weights[LayerNo]
 
 #number of columns represent the number of outputs
 #number of rows represent input
-dWbydA = np.zeros((prevOut.shape[1], Oout.shape[1]))
+dLindW = np.zeros((prevOut.shape[1], Oout.shape[1]))
 print(prevOut.shape, dWbydA.shape)
 for i in range(Oout.shape[1]):
-    dWbydA[:, i] = prevOut
+    dLindW[:, i] = prevOut
 # layersResultAfter.append(prevOust)
-dEdW = dWbydA*dOoutbydOin*dEbydOout
+print(initialWeights[0][-1].shape, prevOut.shape)
+dEdW = dLindW*dOoutbydOin*dEbydOout
 dEdB = dOoutbydOin*dEbydOout
 # print(dEdW.shape, initialWeights[0][-1].shape)
-print(initialWeights[1][-1])
+# print(initialWeights[1][-1])
 #weights update
 weight = initialWeights[0][-1]
 bias = initialWeights[1][-1]
@@ -95,17 +115,23 @@ bias = initialWeights[1][-2]
 weight = weight - lr*dEdW1
 bias = bias - lr*dEdB1
 updatedWeights.append([weight, bias])
-print(bias.shape, weight.shape)
+# print(bias.shape, weight.shape)
 #now think about how to generalize it
 #1st term dEdOout*dOoutdOin*dOindW
 #2nd term dEdOout*dooutdOin*dOindHout*dHoutdHin*dHindW
 #3rd term will be dEdOout*dooutdOin*dOindHout*dHoutdHin*dHindHout2*dHoutdHin2*dHindW3
-for each layer:
-    if layer is output:
-        gradientTerm = dEdOout*dOoutdOin*dOindW
-    if layer is hidden or input:
+for i in range(len(layersResultBefore)):
+    if i==0:
+        #last layer will be number 0
+        savegrad = sigmoidDer(i)*dEdOout()
+        gradientTerm = dLindW(i)*savegrad
+    else:
         #we will save the two terms which are dOindA and dOindW to calculate the below term
-        gradientTerm = gradientTerm*dOindA*dHoutdHin*dHindW/dOindW
+        # gradientTerm = gradientTerm*dOindA*dHoutdHin*dHindW/dOindW
+
+        savegrad = reluDer(i)*np.transpose(dLindA(i))*savegrad
+        gradientTerm = dLindW(i)*savegrad
+
 
 
 
