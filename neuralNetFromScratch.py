@@ -48,6 +48,7 @@ def feedForward(input, weights, biases):
 #some dummy network to check if feedforward network is working
 [layersResultBefore, layersResultAfter] = feedForward(np.ones((1,24), np.float64), initialWeights[0], initialWeights[1])
 lr = 0.1
+dummyInitialWeights = initialWeights.copy()
 #backpropogation
 #define energy function
 #energy function derivative
@@ -60,13 +61,14 @@ for i in range(len(layersResultAfter)):
 Lout.append(inputFeatures)
 for i in range(len(layersResultBefore)):
     Lin.append(layersResultBefore.pop())
-def dEbydOout():
+def dEbydOout(gT):
     return -1*(gT/Lout[0])+(1-gT)/(1-Lout[0])
 #sigmoid derivative
 #(1/(1+np.exp(-dummyInput)))*(1-(1/(1+np.exp(-dummyInput))))
 Oin = layersResultBefore.pop()
 def sigmoidDer(LayerNo):
     return (1/(1+np.exp(-Lin[LayerNo])))*(1-(1/(1+np.exp(-Lin[LayerNo]))))
+
 def reluDer(LayerNo):
     layerIn = Lin[LayerNo]
     return np.where(layerIn>0, layerIn, 0)
@@ -77,8 +79,9 @@ def dLindW(LayerNo):
     for i in range(Lout[LayerNo].shape[1]):
         dLindWvar[:, i] = Lout[LayerNo+1]
     return dLindWvar
+
 def dLindA(LayerNo):
-    return Weights[LayerNo]
+    return initialWeights[0][-LayerNo-1]
 
 #number of columns represent the number of outputs
 #number of rows represent input
@@ -121,7 +124,7 @@ updatedWeights.append([weight, bias])
 #2nd term dEdOout*dooutdOin*dOindHout*dHoutdHin*dHindW
 #3rd term will be dEdOout*dooutdOin*dOindHout*dHoutdHin*dHindHout2*dHoutdHin2*dHindW3
 for i in range(len(layersResultBefore)):
-    if i==0:
+    if i == 0:
         #last layer will be number 0
         savegrad = sigmoidDer(i)*dEdOout()
         gradientTerm = dLindW(i)*savegrad
@@ -131,9 +134,21 @@ for i in range(len(layersResultBefore)):
 
         savegrad = reluDer(i)*np.transpose(dLindA(i))*savegrad
         gradientTerm = dLindW(i)*savegrad
+    
+    dummyInitialWeights[0][-i-1] = initialWeights[0][-i-1] - lr*gradientTerm
+    dummyInitialWeights[1][-i-1] = initialWeights[1][-i-1] - lr*savegrad
+initialWeights = dummyInitialWeights
 
-
-
+# initially define weights
+# input value
+# pass feedforward
+# use backpropogation
+output_array = np.concatenate((np.ones(500,np.float64), np.zeros(500, np.float64)))
+input_array = np.random.uniform(low=0.0, high=1.0, size=(1000,24))
+for i in range(input_array.shape[0]):
+    inputs = input_array[i,:].reshape(1,24)
+    gT = output_array[i]
+    feedForward(inputs, initialWeights[0], initialWeights[1])
 
 
 
