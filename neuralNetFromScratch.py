@@ -47,45 +47,45 @@ def feedForward(input, weights, biases):
     return [layerOutputsBefore, layerOutputsAfter]
 #some dummy network to check if feedforward network is working
 [layersResultBefore, layersResultAfter] = feedForward(np.ones((1,24), np.float64), initialWeights[0], initialWeights[1])
-lr = 0.1
-dummyInitialWeights = initialWeights.copy()
+# lr = 0.1
+# dummyInitialWeights = initialWeights.copy()
 #backpropogation
 #define energy function
 #energy function derivative
-gT = 1
+# gT = 1
 #grads define
-Lout = []
+'''Lout = []
 Lin = []
 for i in range(len(layersResultAfter)):
     Lout.append(layersResultAfter.pop())
 Lout.append(inputFeatures)
 for i in range(len(layersResultBefore)):
-    Lin.append(layersResultBefore.pop())
-def dEbydOout(gT):
-    return -1*(gT/Lout[0])+(1-gT)/(1-Lout[0])
-#sigmoid derivative
-#(1/(1+np.exp(-dummyInput)))*(1-(1/(1+np.exp(-dummyInput))))
-Oin = layersResultBefore.pop()
-def sigmoidDer(LayerNo):
-    return (1/(1+np.exp(-Lin[LayerNo])))*(1-(1/(1+np.exp(-Lin[LayerNo]))))
+    Lin.append(layersResultBefore.pop())'''
+# def dEbydOout(gT):
+#     return -1*(gT/Lout[0])+(1-gT)/(1-Lout[0])
+# #sigmoid derivative
+# #(1/(1+np.exp(-dummyInput)))*(1-(1/(1+np.exp(-dummyInput))))
+# # Oin = layersResultBefore.pop()
+# def sigmoidDer(LayerNo):
+#     return (1/(1+np.exp(-Lin[LayerNo])))*(1-(1/(1+np.exp(-Lin[LayerNo]))))
 
-def reluDer(LayerNo):
-    layerIn = Lin[LayerNo]
-    return np.where(layerIn>0, layerIn, 0)
+# def reluDer(LayerNo):
+#     layerIn = Lin[LayerNo]
+#     return np.where(layerIn>0, layerIn, 0)
 
-prevOut = layersResultAfter.pop()
-def dLindW(LayerNo):
-    dLindWvar = np.zeros((Lout[LayerNo+1].shape[1], Lout[LayerNo].shape[1]))
-    for i in range(Lout[LayerNo].shape[1]):
-        dLindWvar[:, i] = Lout[LayerNo+1]
-    return dLindWvar
+# # prevOut = layersResultAfter.pop()
+# def dLindW(LayerNo):
+#     dLindWvar = np.zeros((Lout[LayerNo+1].shape[1], Lout[LayerNo].shape[1]))
+#     for i in range(Lout[LayerNo].shape[1]):
+#         dLindWvar[:, i] = Lout[LayerNo+1]
+#     return dLindWvar
 
-def dLindA(LayerNo):
-    return initialWeights[0][-LayerNo-1]
+# def dLindA(LayerNo):
+#     return initialWeights[0][-LayerNo-1]
 
 #number of columns represent the number of outputs
 #number of rows represent input
-dLindW = np.zeros((prevOut.shape[1], Oout.shape[1]))
+'''dLindW = np.zeros((prevOut.shape[1], Oout.shape[1]))
 print(prevOut.shape, dWbydA.shape)
 for i in range(Oout.shape[1]):
     dLindW[:, i] = prevOut
@@ -142,15 +142,62 @@ initialWeights = dummyInitialWeights
 # initially define weights
 # input value
 # pass feedforward
-# use backpropogation
-output_array = np.concatenate((np.ones(500,np.float64), np.zeros(500, np.float64)))
-input_array = np.random.uniform(low=0.0, high=1.0, size=(1000,24))
-for i in range(input_array.shape[0]):
-    inputs = input_array[i,:].reshape(1,24)
-    gT = output_array[i]
-    feedForward(inputs, initialWeights[0], initialWeights[1])
+# use backpropogation'''
+output_array = np.concatenate((np.ones(50000,np.float64), np.zeros(50000, np.float64)))
+input_array = np.random.uniform(low=0.0, high=1.0, size=(100000,24))
+def SGDBasedLearning(lr, input_array, output_array, initialWeights):
+    def dEbydOout(gT):
+        return -1*(gT/Lout[0])+(1-gT)/(1-Lout[0])
+    #sigmoid derivative
+    #(1/(1+np.exp(-dummyInput)))*(1-(1/(1+np.exp(-dummyInput))))
+    # Oin = layersResultBefore.pop()
+    def sigmoidDer(LayerNo):
+        return (1/(1+np.exp(-Lin[LayerNo])))*(1-(1/(1+np.exp(-Lin[LayerNo]))))
 
+    def reluDer(LayerNo):
+        layerIn = Lin[LayerNo]
+        return np.where(layerIn>0, layerIn, 0)
 
+    # prevOut = layersResultAfter.pop()
+    def dLindW(LayerNo):
+        dLindWvar = np.zeros((Lout[LayerNo+1].shape[1], Lout[LayerNo].shape[1]))
+        for i in range(Lout[LayerNo].shape[1]):
+            dLindWvar[:, i] = Lout[LayerNo+1]
+        return dLindWvar
+
+    def dLindA(LayerNo):
+        return initialWeights[0][-LayerNo-1]
+
+    for i in range(input_array.shape[0]):
+        dummyInitialWeights = initialWeights.copy()
+        inputs = input_array[i,:].reshape(1,24)
+        gT = output_array[i]
+        [layersResultBefore, layersResultAfter] = feedForward(inputs, initialWeights[0], initialWeights[1])
+        Lout = []
+        Lin = []
+        for i in range(len(layersResultAfter)):
+            Lout.append(layersResultAfter.pop())
+        Lout.append(inputs)
+        for i in range(len(layersResultBefore)):
+            Lin.append(layersResultBefore.pop())
+        for i in range(len(layersResultBefore)):
+            if i == 0:
+                #last layer will be number 0
+                savegrad = sigmoidDer(i)*dEbydOout(gT)
+                gradientTerm = dLindW(i)*savegrad
+            else:
+                #we will save the two terms which are dOindA and dOindW to calculate the below term
+                # gradientTerm = gradientTerm*dOindA*dHoutdHin*dHindW/dOindW
+
+                savegrad = reluDer(i)*np.transpose(dLindA(i))*savegrad
+                gradientTerm = dLindW(i)*savegrad
+            
+            dummyInitialWeights[0][-i-1] = initialWeights[0][-i-1] - lr*gradientTerm
+            dummyInitialWeights[1][-i-1] = initialWeights[1][-i-1] - lr*savegrad
+        initialWeights = dummyInitialWeights
+    return initialWeights
+w = SGDBasedLearning(0.01, input_array, output_array, initialWeights)
+print(w[0], w[1])
 
 
 
