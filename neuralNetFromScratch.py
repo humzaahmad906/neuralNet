@@ -5,7 +5,7 @@ import numpy as np
 #we will start with required input features
 def weightsInitialization(inputFeatures, hidLayer, outLayer):
     #define the architecture of the network
-    #lets suppose in our case we take a network of 1 input layer of 24 input units 3 hidden layers with units of 40, 50 and 30 with binary output
+    #lets suppose in our case we take a network of 1 input layer of 12 input units 3 hidden layers with units of 40, 50 and 30 with binary output
     #list in wich we will store these weights layers
     weights = []
     biases = []
@@ -18,7 +18,7 @@ def weightsInitialization(inputFeatures, hidLayer, outLayer):
     weights.append(np.random.normal(0, 0.5, (hidLayer[len(hidLayer)-1], outLayer)))
     biases.append(np.random.normal(0, 0.5, outLayer))
     return [weights, biases]
-initialWeights = weightsInitialization(24, [40, 50, 30], 1)
+initialWeights = weightsInitialization(12, [40, 50, 30], 1)
 for j in range(len(initialWeights[0])):
     print(initialWeights[0][j].shape)
 #as now we have initialized our network lets see if it will be able to predict anything
@@ -46,7 +46,7 @@ def feedForward(input, weights, biases):
             layerOutputsAfter.append(dummyInput)
     return [layerOutputsBefore, layerOutputsAfter]
 #some dummy network to check if feedforward network is working
-[layersResultBefore, layersResultAfter] = feedForward(np.ones((1,24), np.float64), initialWeights[0], initialWeights[1])
+[layersResultBefore, layersResultAfter] = feedForward(np.ones((1,12), np.float64), initialWeights[0], initialWeights[1])
 # lr = 0.1
 # dummyInitialWeights = initialWeights.copy()
 #backpropogation
@@ -144,7 +144,7 @@ initialWeights = dummyInitialWeights
 # pass feedforward
 # use backpropogation'''
 output_array = np.concatenate((np.ones(50000,np.float64), np.zeros(50000, np.float64)))
-input_array = np.random.uniform(low=0.0, high=1.0, size=(100000,24))
+input_array = np.random.uniform(low=0.0, high=1.0, size=(100000,12))
 def SGDBasedLearning(lr, input_array, output_array, initialWeights):
     def dEbydOout(gT):
         return -1*(gT/Lout[0])+(1-gT)/(1-Lout[0])
@@ -170,7 +170,7 @@ def SGDBasedLearning(lr, input_array, output_array, initialWeights):
 
     for i in range(input_array.shape[0]):
         dummyInitialWeights = initialWeights.copy()
-        inputs = input_array[i,:].reshape(1,24)
+        inputs = input_array[i,:].reshape(1,input_array.shape[1])
         gT = output_array[i]
         [layersResultBefore, layersResultAfter] = feedForward(inputs, initialWeights[0], initialWeights[1])
         Lout = []
